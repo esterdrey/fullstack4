@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "./App.css"; // קישור לקובץ העיצוב
 import TextDisplay from "./components/TextDisplay";
 import EditorPanel from "./components/EditorPanel";
 import AuthForm from "./components/AuthForm";
@@ -98,14 +99,8 @@ function App() {
 
   const handleAddChar = (charValue) => {
     if (!activeDocument) return;
-
     saveToHistory(activeDocument.chars);
-
-    const newCharObj = {
-      value: charValue,
-      ...currentStyle
-    };
-
+    const newCharObj = { value: charValue, ...currentStyle };
     updateActiveDocument((doc) => ({
       ...doc,
       chars: [...doc.chars, newCharObj]
@@ -114,43 +109,25 @@ function App() {
 
   const handleClear = () => {
     if (!activeDocument || activeDocument.chars.length === 0) return;
-
     saveToHistory(activeDocument.chars);
-
-    updateActiveDocument((doc) => ({
-      ...doc,
-      chars: []
-    }));
+    updateActiveDocument((doc) => ({ ...doc, chars: [] }));
   };
 
   const handleDeleteChar = () => {
     if (!activeDocument || activeDocument.chars.length === 0) return;
-
     saveToHistory(activeDocument.chars);
-
-    updateActiveDocument((doc) => ({
-      ...doc,
-      chars: doc.chars.slice(0, -1)
-    }));
+    updateActiveDocument((doc) => ({ ...doc, chars: doc.chars.slice(0, -1) }));
   };
 
   const handleDeleteWord = () => {
     if (!activeDocument || activeDocument.chars.length === 0) return;
-
     saveToHistory(activeDocument.chars);
-
-    updateActiveDocument((doc) => ({
-      ...doc,
-      chars: deleteLastWord(doc.chars)
-    }));
+    updateActiveDocument((doc) => ({ ...doc, chars: deleteLastWord(doc.chars) }));
   };
 
   const handleUndo = () => {
     if (!activeDocument || activeDocument.history.length === 0) return;
-
-    const previousState =
-      activeDocument.history[activeDocument.history.length - 1];
-
+    const previousState = activeDocument.history[activeDocument.history.length - 1];
     updateActiveDocument((doc) => ({
       ...doc,
       chars: previousState,
@@ -169,78 +146,49 @@ function App() {
 
   const handleReplace = (searchText, replaceText) => {
     if (!activeDocument) return false;
-
-    const newChars = replaceTextInChars(
-      activeDocument.chars,
-      searchText,
-      replaceText,
-      currentStyle
-    );
-
+    const newChars = replaceTextInChars(activeDocument.chars, searchText, replaceText, currentStyle);
     if (!newChars) return false;
-
     saveToHistory(activeDocument.chars);
-
-    updateActiveDocument((doc) => ({
-      ...doc,
-      chars: newChars
-    }));
-
+    updateActiveDocument((doc) => ({ ...doc, chars: newChars }));
     return true;
   };
 
   const handleSave = () => {
     if (!currentUser || !activeDocument) return;
-
     if (!activeDocument.savedFileName.trim()) {
       alert("אין שם קובץ. השתמשי ב-Save As");
       return;
     }
-
-    saveFileForUser(
-      currentUser.username,
-      activeDocument.savedFileName,
-      activeDocument.chars
-    );
-
+    saveFileForUser(currentUser.username, activeDocument.savedFileName, activeDocument.chars);
     refreshSavedFiles();
     alert("הקובץ נשמר");
   };
 
   const handleSaveAs = () => {
     if (!currentUser || !activeDocument) return;
-
     const newFileName = prompt("הכניסי שם קובץ חדש:");
-
     if (!newFileName || !newFileName.trim()) {
       alert("שם קובץ לא תקין");
       return;
     }
-
     const trimmedName = newFileName.trim();
-
     saveFileForUser(currentUser.username, trimmedName, activeDocument.chars);
-
     updateActiveDocument((doc) => ({
       ...doc,
       savedFileName: trimmedName,
       name: trimmedName
     }));
-
     refreshSavedFiles();
     alert("הקובץ נשמר בהצלחה");
   };
 
   const handleOpenFile = (fileName) => {
     if (!currentUser) return;
-
     const parsedData = openFileForUser(currentUser.username, fileName);
-
     if (!parsedData) {
       alert("הקובץ לא נמצא");
       return;
     }
-
     updateActiveDocument((doc) => ({
       ...doc,
       chars: parsedData.chars || [],
@@ -248,14 +196,12 @@ function App() {
       savedFileName: parsedData.fileName || fileName,
       name: parsedData.fileName || fileName
     }));
-
     alert(`הקובץ "${fileName}" נפתח`);
   };
 
   const handleNewDocument = () => {
     const newDocNumber = documents.length + 1;
     const newDoc = createEmptyDocument(`מסמך ${newDocNumber}`);
-
     setDocuments((prev) => [...prev, newDoc]);
     setActiveDocumentId(newDoc.id);
   };
@@ -269,72 +215,33 @@ function App() {
       alert("חייב להישאר לפחות מסמך אחד פתוח");
       return;
     }
-
     const docToClose = documents.find((doc) => doc.id === documentId);
-    if (!docToClose) return;
-
-    if (docToClose.chars.length > 0) {
-      const shouldClose = window.confirm(
-        "לסגור את המסמך? שינויים שלא נשמרו עלולים ללכת לאיבוד."
-      );
-      if (!shouldClose) return;
+    if (docToClose?.chars.length > 0) {
+      if (!window.confirm("לסגור את המסמך? שינויים שלא נשמרו עלולים ללכת לאיבוד.")) return;
     }
-
     const remainingDocs = documents.filter((doc) => doc.id !== documentId);
     setDocuments(remainingDocs);
-
-    if (activeDocumentId === documentId) {
-      setActiveDocumentId(remainingDocs[0].id);
-    }
+    if (activeDocumentId === documentId) setActiveDocumentId(remainingDocs[0].id);
   };
 
   const handleAuthInputChange = (e) => {
     const { name, value } = e.target;
-    setAuthForm((prev) => ({
-      ...prev,
-      [name]: value
-    }));
+    setAuthForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleRegister = () => {
-    const username = authForm.username.trim();
-    const password = authForm.password.trim();
-
-    if (!username || !password) {
-      alert("יש למלא שם משתמש וסיסמה");
-      return;
-    }
-
-    const result = registerUser(username, password);
-
-    if (!result.success) {
-      alert(result.message);
-      return;
-    }
-
-    alert("ההרשמה בוצעה בהצלחה");
-    setLoginMode("login");
-    setAuthForm({ username: "", password: "" });
+    const { username, password } = authForm;
+    if (!username.trim() || !password.trim()) { alert("יש למלא פרטים"); return; }
+    const result = registerUser(username.trim(), password.trim());
+    if (!result.success) { alert(result.message); return; }
+    alert("ההרשמה בוצעה"); setLoginMode("login");
   };
 
   const handleLogin = () => {
-    const username = authForm.username.trim();
-    const password = authForm.password.trim();
-
-    if (!username || !password) {
-      alert("יש למלא שם משתמש וסיסמה");
-      return;
-    }
-
-    const result = loginUser(username, password);
-
-    if (!result.success) {
-      alert(result.message);
-      return;
-    }
-
+    const { username, password } = authForm;
+    const result = loginUser(username.trim(), password.trim());
+    if (!result.success) { alert(result.message); return; }
     setCurrentUser(result.user);
-    setAuthForm({ username: "", password: "" });
   };
 
   const handleLogout = () => {
@@ -358,24 +265,22 @@ function App() {
   }
 
   return (
-    <div style={{ padding: "20px", direction: "rtl" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "15px"
-        }}
-      >
-        <h1>עורך טקסט ויזואלי</h1>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontWeight: "bold" }}>
-            משתמש מחובר: {currentUser.username}
-          </span>
-          <button onClick={handleLogout}>התנתקי</button>
+    <div className="app-container">
+      <header className="app-header">
+        <div className="logo-section">
+          <div className="logo-icon">T</div>
+          <h1 className="app-title">עורך טקסטים</h1>
         </div>
-      </div>
+
+        <div className="user-section">
+          <span className="user-info">
+            שלום, <strong>{currentUser.username}</strong>
+          </span>
+          <button className="logout-btn" onClick={handleLogout}>
+            התנתקי
+          </button>
+        </div>
+      </header>
 
       <DocumentTabs
         documents={documents}
@@ -386,8 +291,8 @@ function App() {
       />
 
       {activeDocument && (
-        <div style={{ marginBottom: "10px", fontWeight: "bold" }}>
-          מסמך פעיל: {activeDocument.name}
+        <div className="active-doc-label">
+          מסמך פעיל: <span className="active-doc-name">{activeDocument.name}</span>
         </div>
       )}
 
