@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./App.css"; // קישור לקובץ העיצוב
+import "./App.css"; 
 import TextDisplay from "./components/TextDisplay";
 import EditorPanel from "./components/EditorPanel";
 import AuthForm from "./components/AuthForm";

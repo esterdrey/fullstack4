@@ -3,7 +3,6 @@ import React from "react";
 const TextDisplay = ({ chars }) => {
   const styles = {
     displayArea: {
-      
       backgroundColor: "#ffffff",
       border: "1px solid #e0e0e0",
       borderRadius: "12px",
@@ -12,13 +11,10 @@ const TextDisplay = ({ chars }) => {
       marginBottom: "25px",
       boxShadow: "inset 0 2px 4px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.05)",
       
-      
       whiteSpace: "pre-wrap",
       textAlign: "right",
-      direction: "rtl",
       overflowY: "auto",
       lineHeight: "1.5", 
-      
       
       scrollbarWidth: "thin",
       scrollbarColor: "#ccc transparent",
@@ -26,7 +22,7 @@ const TextDisplay = ({ chars }) => {
   };
 
   return (
-    <div style={styles.displayArea}>
+    <div style={styles.displayArea} dir="auto">
       {chars.length === 0 ? (
         <span style={{ color: "#aaa", fontStyle: "italic", fontSize: "16px" }}>
           התחילי להקליד כאן...
@@ -42,7 +38,6 @@ const TextDisplay = ({ chars }) => {
               fontWeight: charObj.fontWeight || "normal",
               fontStyle: charObj.fontStyle || "normal",
               textDecoration: charObj.textDecoration || "none",
-             
               display: "inline-block",
               minWidth: charObj.value === " " ? "0.3em" : "auto" 
             }}
